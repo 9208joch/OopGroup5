@@ -8,16 +8,26 @@ public class ProductRepository : IProductRepository
     {
         _context = context;
     }
+    //Funktionskontroll:
+    public async Task<List<Product>> GetRandomProductsAsync(int count)
+    {
+        return await _context.Products
+            .OrderBy(x => Guid.NewGuid()) // random
+            .Take(count)
+            .ToListAsync();
+    }
+    //Funktionskontroll:
+    public async Task SeedProductsAsync()
+    {
+        if (_context.Products.Any())
+            return;
+
+        var products = ProductSeeder.GenerateProducts(1001);
+
+        await _context.Products.AddRangeAsync(products);
+        await _context.SaveChangesAsync();
+    }
 
     public async Task<List<Product>> GetAllAsync()
         => await _context.Products.ToListAsync();
-
-    public async Task<Product> GetByIdAsync(int id)
-        => await _context.Products.FindAsync(id);
-
-    public async Task AddAsync(Product product)
-    {
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
-    }
 }
